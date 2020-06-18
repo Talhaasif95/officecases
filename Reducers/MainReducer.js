@@ -8,6 +8,10 @@ const INITIAL_STATE = {
   weight: '',
   password: '',
   confirmpassword: '',
+  pickerone: '',
+  pickertwo: '',
+  reason: '',
+  note: '',
 };
 
 const LoginReducer = (state = INITIAL_STATE, action) => {
@@ -26,6 +30,14 @@ const LoginReducer = (state = INITIAL_STATE, action) => {
 
 const MainReducer = (state = INITIAL_STATE, action) => {
   switch (action.type) {
+    case 'pickerone':
+      return {...state, pickerone: action.payload};
+    case 'pickertwo':
+      return {...state, pickertwo: action.payload};
+    case 'reason':
+      return {...state, reason: action.payload};
+    case 'note':
+      return {...state, note: action.payload};
     default:
       return state;
   }

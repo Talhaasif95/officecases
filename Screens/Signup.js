@@ -149,6 +149,7 @@ class Signup extends Component {
                         this.props.SignUpReducer.email,
                         this.props.SignUpReducer.password,
                       )
+
                       .then((res) => {
                         if (res.user) {
                           firebase

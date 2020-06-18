@@ -16,15 +16,15 @@ import {Toast, Icon} from 'native-base';
 import Theme from '../Styles/Theme';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
-import {actionCreateCase} from '../Actions/index';
+import {actionSignin} from '../Actions/index';
 import {ScrollView} from 'react-native-gesture-handler';
 import firebase from '../database/firebase';
 import HeaderWhite from '../Component/HeaderWhite';
 import {URL} from '../config';
-class CreateCase extends Component {
+class ChooseLocation extends Component {
   constructor(props) {
     super(props);
-    this.state = {data: [], pickerone: '', pickertwo: '', reason: '', note: ''};
+    this.state = {data: [], pickerone: '', pickertwo: ''};
   }
   componentDidMount() {
     this.getPickerOneData();
@@ -57,38 +57,12 @@ class CreateCase extends Component {
   render() {
     return (
       <View style={{flex: 1}}>
-        <HeaderWhite text="New Case"></HeaderWhite>
+        <HeaderWhite text="Choose Location"></HeaderWhite>
         <ScrollView
           contentContainerStyle={{flexGrow: 1, justifyContent: 'space-evenly'}}>
           <View style={{flex: 1, justifyContent: 'space-evenly'}}>
             <View>
-              <Text style={{width: 300, alignSelf: 'center'}}>Reason</Text>
-              <TextInput
-                style={[StyleMain.inputStyle, {height: 100}]}
-                textAlignVertical="top"
-                placeholder={'Type your reason'}
-                multiline={true}
-                onChangeText={(text) => {
-                  this.props.actionCreateCase('reason', text);
-                }}
-              />
-            </View>
-            <View>
-              <Text style={{width: 300, alignSelf: 'center'}}>Note</Text>
-              <TextInput
-                style={[StyleMain.inputStyle, {height: 100}]}
-                textAlignVertical="top"
-                placeholder="Write a note"
-                multiline={true}
-                onChangeText={(text) => {
-                  this.props.actionCreateCase('note', text);
-                }}
-              />
-            </View>
-            <View>
-              <Text style={{width: 300, alignSelf: 'center'}}>
-                Choose Value
-              </Text>
+              <Text style={{width: 300, alignSelf: 'center'}}>Choose City</Text>
               <Picker
                 style={{
                   width: 300,
@@ -104,9 +78,9 @@ class CreateCase extends Component {
                   paddingBottom: 3,
                   paddingRight: 15,
                 }}
-                selectedValue={this.props.MainReducer.pickerone}
+                selectedValue={this.state.pickerone}
                 onValueChange={(value) => {
-                  this.props.actionCreateCase('pickerone', value);
+                  this.setState({pickerone: value});
                 }}>
                 {this.state.data.map((myValue, myIndex) => {
                   return (
@@ -121,7 +95,7 @@ class CreateCase extends Component {
             </View>
             <View>
               <Text style={{width: 300, alignSelf: 'center'}}>
-                Choose Value{' '}
+                Choose Location
               </Text>
               <Picker
                 style={{
@@ -138,9 +112,9 @@ class CreateCase extends Component {
                   paddingBottom: 3,
                   paddingRight: 15,
                 }}
-                selectedValue={this.props.MainReducer.pickertwo}
+                selectedValue={this.state.pickertwo}
                 onValueChange={(value) => {
-                  this.props.actionCreateCase('pickertwo', value);
+                  this.setState({pickertwo: value});
                 }}>
                 {this.state.data.map((myValue, myIndex) => {
                   return (
@@ -181,13 +155,6 @@ class CreateCase extends Component {
                 <Text style={{color: 'red'}}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => {
-                  this.props.navigation.navigate('ChooseLocation');
-                  console.warn(this.props.MainReducer.pickerone);
-                  console.warn(this.props.MainReducer.pickertwo);
-                  console.warn(this.props.MainReducer.note);
-                  console.warn(this.props.MainReducer.reason);
-                }}
                 style={{
                   fontSize: Theme.FONT_SIZE_MEDIUM,
                   fontWeight: Theme.FONT_WEIGHT_LIGHT,
@@ -203,7 +170,7 @@ class CreateCase extends Component {
                   height: 50,
                   flex: 0.3,
                 }}>
-                <Text style={{color: 'white'}}>Create</Text>
+                <Text style={{color: 'white'}}>Save</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -225,14 +192,14 @@ const Styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state) => {
-  const {MainReducer} = state;
-  return {MainReducer};
+  const {LoginReducer} = state;
+  return {LoginReducer};
 };
 const mapDispatchToProps = (dispatch) =>
   bindActionCreators(
     {
-      actionCreateCase,
+      actionSignin,
     },
     dispatch,
   );
-export default connect(mapStateToProps, mapDispatchToProps)(CreateCase);
+export default connect(mapStateToProps, mapDispatchToProps)(ChooseLocation);
