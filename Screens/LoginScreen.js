@@ -20,6 +20,7 @@ import {bindActionCreators} from 'redux';
 import {actionSignin} from '../Actions/index';
 import {ScrollView} from 'react-native-gesture-handler';
 import firebase from '../database/firebase';
+import {URL} from '../config';
 class LoginScreen extends Component {
   constructor(props) {
     super(props);
@@ -59,7 +60,7 @@ class LoginScreen extends Component {
           key: 'loginState',
         })
         .then((ret) => {
-          this.props.navigation.replace('Home');
+          // this.props.navigation.replace('Home');
         })
         .catch((err) => {
           //console.error(err.message);
@@ -102,29 +103,69 @@ class LoginScreen extends Component {
   Loginclick = () => {
     this.setState({loading: true});
     var self = this;
-    firebase
-      .auth()
-      .signInWithEmailAndPassword(this.state.textEmail, this.state.textPassword)
-
-      .then((res) => {
+    axios
+      //.get("http://192.168.0.105/Coinroll/select_script.php", {
+      // .get("http://10.0.3.2:8080/Coinroll/select_script.php", {
+      .get(URL + '/login', {
+        params: {
+          userEmail: this.state.textEmail,
+          userPassword: this.state.textPassword,
+        },
+      })
+      .then(function (response) {
+        console.warn(response);
         self.setState({loading: false});
-        if (res.user) {
+        if (response.data.status) {
           global.storage.save({
             key: 'loginState', // Note: Do not use underscore("_") in key!
-            data: res.user,
+            data: response.data.status,
             // if expires not specified, the defaultExpires will be applied instead.
             // if set to null, then it will never expire.
           });
           self.props.navigation.replace('Home');
         } else {
-          Toast.show({text: 'Invalid Credentials'});
+          Toast.show({
+            text: 'Incorrect Email or Password',
+            buttonText: 'Okay',
+            duration: 3000,
+          });
         }
       })
-      .catch((error) => {
+      .catch(function (error) {
         self.setState({loading: false});
-
-        Toast.show({text: error.message});
+        Toast.show({
+          text: 'Network Error',
+          buttonText: 'Okay',
+          duration: 3000,
+        });
+        console.warn(error);
+        // self.refs.toast.show("Network Error", 500, () => {
+        //   // something you want to do at close
+        // });
       });
+    // firebase
+    //   .auth()
+    //   .signInWithEmailAndPassword(this.state.textEmail, this.state.textPassword)
+
+    //   .then((res) => {
+    //     self.setState({loading: false});
+    //     if (res.user) {
+    //       global.storage.save({
+    //         key: 'loginState', // Note: Do not use underscore("_") in key!
+    //         data: res.user,
+    //         // if expires not specified, the defaultExpires will be applied instead.
+    //         // if set to null, then it will never expire.
+    //       });
+    //       self.props.navigation.replace('Home');
+    //     } else {
+    //       Toast.show({text: 'Invalid Credentials'});
+    //     }
+    //   })
+    //   .catch((error) => {
+    //     self.setState({loading: false});
+
+    //     Toast.show({text: error.message});
+    //   });
   };
   render() {
     return (
@@ -140,9 +181,9 @@ class LoginScreen extends Component {
             <Image
               resizeMode="contain"
               style={{
-                width: '120%',
+                width: '80%',
 
-                height: '120%',
+                height: '80%',
               }}
               source={require('../assets/logo.png')}
             />

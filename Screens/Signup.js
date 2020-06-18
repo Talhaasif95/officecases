@@ -18,6 +18,8 @@ import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import {actionSignup} from '../Actions/index';
 import firebase from '../database/firebase';
+import axios from 'axios';
+import {URL} from '../config';
 class Signup extends Component {
   constructor(props) {
     super(props);
@@ -143,32 +145,69 @@ class Signup extends Component {
                 onPress={() => {
                   var self = this;
                   if (this.checkFields()) {
-                    firebase
-                      .auth()
-                      .createUserWithEmailAndPassword(
-                        this.props.SignUpReducer.email,
-                        this.props.SignUpReducer.password,
-                      )
-
-                      .then((res) => {
-                        if (res.user) {
-                          firebase
-                            .database()
-                            .ref('users/' + res.user.uid)
-                            .set({
-                              name: self.props.SignUpReducer.name,
-                              email: self.props.SignUpReducer.email,
-                              age: self.props.SignUpReducer.age,
-                              gender: self.props.SignUpReducer.gender,
-                              weight: self.props.SignUpReducer.weight,
-                            });
-                          Toast.show({text: 'User registered successfully!'});
-
-                          console.log('User registered successfully!');
+                    var self = this;
+                    axios
+                      .get(URL + '/signup', {
+                        params: {
+                          userEmail: this.props.SignUpReducer.email,
+                          userPassword: this.props.SignUpReducer.password,
+                          name: self.props.SignUpReducer.name,
+                          age: self.props.SignUpReducer.age,
+                          gender: self.props.SignUpReducer.gender,
+                          weight: self.props.SignUpReducer.weight,
+                        },
+                      })
+                      .then(function (response) {
+                        console.warn(response);
+                        self.setState({loading: false});
+                        if (response.data.status) {
+                          self.props.navigation.replace('Home');
                         } else {
+                          Toast.show({
+                            text: 'Something went wrong',
+                            buttonText: 'Okay',
+                            duration: 3000,
+                          });
                         }
                       })
-                      .catch((error) => Toast.show({text: error.message}));
+                      .catch(function (error) {
+                        self.setState({loading: false});
+                        Toast.show({
+                          text: 'Network Error',
+                          buttonText: 'Okay',
+                          duration: 3000,
+                        });
+                        console.warn(error);
+                        // self.refs.toast.show("Network Error", 500, () => {
+                        //   // something you want to do at close
+                        // });
+                      });
+                    // firebase
+                    //   .auth()
+                    //   .createUserWithEmailAndPassword(
+                    //     this.props.SignUpReducer.email,
+                    //     this.props.SignUpReducer.password,
+                    //   )
+
+                    //   .then((res) => {
+                    //     if (res.user) {
+                    //       firebase
+                    //         .database()
+                    //         .ref('users/' + res.user.uid)
+                    //         .set({
+                    //           name: self.props.SignUpReducer.name,
+                    //           email: self.props.SignUpReducer.email,
+                    //           age: self.props.SignUpReducer.age,
+                    //           gender: self.props.SignUpReducer.gender,
+                    //           weight: self.props.SignUpReducer.weight,
+                    //         });
+                    //       Toast.show({text: 'User registered successfully!'});
+
+                    //       console.log('User registered successfully!');
+                    //     } else {
+                    //     }
+                    //   })
+                    //   .catch((error) => Toast.show({text: error.message}));
                   }
                 }}>
                 <View style={StyleMain.button}>

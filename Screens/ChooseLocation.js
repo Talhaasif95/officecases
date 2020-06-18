@@ -16,7 +16,7 @@ import {Toast, Icon} from 'native-base';
 import Theme from '../Styles/Theme';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
-import {actionSignin} from '../Actions/index';
+import {actionCreateCase} from '../Actions/index';
 import {ScrollView} from 'react-native-gesture-handler';
 import firebase from '../database/firebase';
 import HeaderWhite from '../Component/HeaderWhite';
@@ -24,22 +24,76 @@ import {URL} from '../config';
 class ChooseLocation extends Component {
   constructor(props) {
     super(props);
-    this.state = {data: [], pickerone: '', pickertwo: ''};
+    this.state = {data: [], location: [], pickerone: '', pickertwo: ''};
   }
   componentDidMount() {
-    this.getPickerOneData();
+    this.getCities();
+    this.getLocation();
   }
-  getPickerOneData() {
+  getLocation() {
     var self = this;
     axios
-      .get(URL + '/getPickerData', {
+      .get(URL + '/getLocation')
+      .then(function (response) {
+        console.warn(response);
+        self.setState({location: response.data.location});
+      })
+      .catch(function (error) {
+        self.setState({loading: false});
+        Toast.show({
+          text: 'Network Error',
+          buttonText: 'Okay',
+          duration: 3000,
+        });
+        console.warn(error);
+        // self.refs.toast.show("Network Error", 500, () => {
+        //   // something you want to do at close
+        // });
+      });
+  }
+
+  getCities() {
+    var self = this;
+    axios
+      .get(URL + '/getCities')
+      .then(function (response) {
+        console.warn(response);
+        self.setState({data: response.data.cities});
+      })
+      .catch(function (error) {
+        self.setState({loading: false});
+        Toast.show({
+          text: 'Network Error',
+          buttonText: 'Okay',
+          duration: 3000,
+        });
+        console.warn(error);
+        // self.refs.toast.show("Network Error", 500, () => {
+        //   // something you want to do at close
+        // });
+      });
+  }
+  saveData() {
+    var self = this;
+    axios
+      .get(URL + '/saveData', {
         params: {
-          userID: 1,
+          userToken: this.props.MainReducer.userToken,
+          reason: this.props.MainReducer.reason,
+          note: this.props.MainReducer.note,
+          picker1: this.props.MainReducer.pickerone,
+          picker2: this.props.MainReducer.pickertwo,
+          city: this.props.MainReducer.city,
+          location: this.props.MainReducer.location,
         },
       })
       .then(function (response) {
         console.warn(response);
-        self.setState({data: response.data.cases});
+        if (response.data.success) {
+          self.props.navigation.navigate('FeedbackScreen');
+        } else {
+          alert('An error ');
+        }
       })
       .catch(function (error) {
         self.setState({loading: false});
@@ -60,7 +114,7 @@ class ChooseLocation extends Component {
         <HeaderWhite text="Choose Location"></HeaderWhite>
         <ScrollView
           contentContainerStyle={{flexGrow: 1, justifyContent: 'space-evenly'}}>
-          <View style={{flex: 1, justifyContent: 'space-evenly'}}>
+          <View style={{flex: 1, marginTop: 20}}>
             <View>
               <Text style={{width: 300, alignSelf: 'center'}}>Choose City</Text>
               <Picker
@@ -78,22 +132,24 @@ class ChooseLocation extends Component {
                   paddingBottom: 3,
                   paddingRight: 15,
                 }}
-                selectedValue={this.state.pickerone}
+                selectedValue={this.props.MainReducer.city}
                 onValueChange={(value) => {
+                  this.props.actionCreateCase('city', value);
+
                   this.setState({pickerone: value});
                 }}>
                 {this.state.data.map((myValue, myIndex) => {
                   return (
                     <Picker.Item
-                      label={myValue.key}
-                      value={myValue.key}
-                      key={myValue.value}
+                      label={myValue.name}
+                      value={myValue.name}
+                      key={myValue.name}
                     />
                   );
                 })}
               </Picker>
             </View>
-            <View>
+            <View style={{marginTop: 20}}>
               <Text style={{width: 300, alignSelf: 'center'}}>
                 Choose Location
               </Text>
@@ -112,16 +168,16 @@ class ChooseLocation extends Component {
                   paddingBottom: 3,
                   paddingRight: 15,
                 }}
-                selectedValue={this.state.pickertwo}
+                selectedValue={this.props.MainReducer.location}
                 onValueChange={(value) => {
-                  this.setState({pickertwo: value});
+                  this.props.actionCreateCase('location', value);
                 }}>
-                {this.state.data.map((myValue, myIndex) => {
+                {this.state.location.map((myValue, myIndex) => {
                   return (
                     <Picker.Item
-                      label={myValue.key}
-                      value={myValue.key}
-                      key={myValue.value}
+                      label={myValue.name}
+                      value={myValue.name}
+                      key={myValue.name}
                     />
                   );
                 })}
@@ -155,6 +211,9 @@ class ChooseLocation extends Component {
                 <Text style={{color: 'red'}}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
+                onPress={() => {
+                  this.saveData();
+                }}
                 style={{
                   fontSize: Theme.FONT_SIZE_MEDIUM,
                   fontWeight: Theme.FONT_WEIGHT_LIGHT,
@@ -192,13 +251,13 @@ const Styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state) => {
-  const {LoginReducer} = state;
-  return {LoginReducer};
+  const {MainReducer} = state;
+  return {MainReducer};
 };
 const mapDispatchToProps = (dispatch) =>
   bindActionCreators(
     {
-      actionSignin,
+      actionCreateCase,
     },
     dispatch,
   );

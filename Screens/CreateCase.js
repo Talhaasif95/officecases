@@ -34,7 +34,7 @@ class CreateCase extends Component {
     axios
       .get(URL + '/getPickerData', {
         params: {
-          userID: 1,
+          userToken: self.props.MainReducer.userToken,
         },
       })
       .then(function (response) {

@@ -12,6 +12,9 @@ const INITIAL_STATE = {
   pickertwo: '',
   reason: '',
   note: '',
+  city: '',
+  location: '',
+  userToken: '',
 };
 
 const LoginReducer = (state = INITIAL_STATE, action) => {
@@ -23,6 +26,8 @@ const LoginReducer = (state = INITIAL_STATE, action) => {
       return {...state, email: action.payload};
     case 'password':
       return {...state, password: action.payload};
+    case 'userToken':
+      return {...state, userToken: action.payload};
     default:
       return state;
   }
@@ -38,6 +43,10 @@ const MainReducer = (state = INITIAL_STATE, action) => {
       return {...state, reason: action.payload};
     case 'note':
       return {...state, note: action.payload};
+    case 'city':
+      return {...state, city: action.payload};
+    case 'location':
+      return {...state, location: action.payload};
     default:
       return state;
   }

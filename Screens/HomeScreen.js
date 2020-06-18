@@ -18,12 +18,35 @@ class HomeScreen extends Component {
     this.state = {listData: []};
   }
   componentDidMount() {
+    var self = this;
+    global.storage
+      .load({
+        key: 'loginState',
+      })
+      .then((ret) => {
+        self.props.actionSignin('userToken', ret.status.token);
+      })
+      .catch((err) => {
+        //console.error(err.message);
+        switch (err.name) {
+          case 'NotFoundError':
+            // TODO;
+            break;
+          case 'ExpiredError':
+            // TODO
+            break;
+        }
+      });
     this.getCases();
   }
   getCases() {
     var self = this;
     axios
-      .get(URL + '/getCases')
+      .get(URL + '/getCases', {
+        params: {
+          userToken: self.props.LoginReducer.userToken,
+        },
+      })
       .then(function (response) {
         console.warn(response);
         self.setState({listData: response.data.cases});
